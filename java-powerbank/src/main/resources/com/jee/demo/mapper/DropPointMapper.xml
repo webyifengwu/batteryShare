@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jee.demo.mapper.DropPointMapper">
+    <!-- 根据投放点ID查询投放点信息 -->
+    <select id="getDropPointById" resultType="DropPoint">
+        SELECT *
+        FROM drop_point
+        WHERE dp_id = #{dpId} <!-- 根据指定的投放点ID查询投放点信息 -->
+    </select>
+
+    <!-- 查询投放点列表 -->
+    <select id="queryDropPointList" resultType="DropPoint">
+        SELECT *
+        FROM drop_point
+        <where>
+            <!-- 如果传入了投放点名称，则根据名称模糊查询 -->
+            <if test="dpName != null and dpName != ''">
+                dp_name LIKE '%${dpName}%'
+            </if>
+            <!-- 如果传入了投放点区域，则根据区域模糊查询 -->
+            <if test="dpZone != null and dpZone != ''">
+                AND dp_zone LIKE '%${dpZone}%'
+            </if>
+        </where>
+        ORDER BY dp_stock DESC <!-- 按照库存降序排序 -->
+    </select>
+
+    <!-- 根据模式查询所有非指定模式的投放点列表 -->
+    <select id="getAllDropPointListByMode" resultType="DropPoint">
+        SELECT *
+        FROM drop_point
+        WHERE dp_stock != ${mode} <!-- 查询库存不等于指定模式的投放点 -->
+    </select>
+
+    <!-- 插入投放点 -->
+    <insert id="insertDropPoint">
+        INSERT INTO drop_point
+        (dp_id, dp_name, dp_zone, dp_stock, dp_all)
+        VALUES
+        (#{dpId}, #{dpName}, #{dpZone}, #{dpStock}, #{dpAll}) <!-- 插入投放点信息 -->
+    </insert>
+
+    <!-- 删除投放点 -->
+    <delete id="deleteDropPoint">
+        DELETE FROM drop_point
+        WHERE dp_id = #{dpId} <!-- 根据指定的投放点ID进行删除 -->
+    </delete>
+
+    <!-- 更新投放点信息 -->
+    <update id="updateDropPoint">
+        UPDATE drop_point
+        <set>
+            <!-- 如果传入了投放点名称，则更新名称字段 -->
+            <if test="dpName != null and dpName != ''">
+                dp_name = #{dpName},
+            </if>
+            <!-- 如果传入了投放点区域，则更新区域字段 -->
+            <if test="dpZone != null and dpZone != ''">
+                dp_zone = #{dpZone},
+            </if>
+            <!-- 如果传入了投放点库存，则更新库存字段 -->
+            <if test="dpStock != null and dpStock != ''">
+                dp_stock = #{dpStock},
+            </if>
+            <!-- 如果传入了投放点总数，则更新总数字段 -->
+            <if test="dpAll != null and dpAll != ''">
+                dp_all = #{dpAll}
+            </if>
+        </set>
+        WHERE dp_id = #{dpId} <!-- 根据指定的投放点ID进行更新 -->
+    </update>
+
+</mapper>

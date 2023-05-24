@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jee.demo.mapper.UserMapper">
+    <!-- 根据用户名和密码查询用户信息 -->
+    <select id="getUserByUser" resultType="User">
+        SELECT *
+        FROM user
+        WHERE username = #{username} AND password = #{password} <!-- 根据指定的用户名和密码查询用户信息 -->
+    </select>
+
+    <!-- 根据用户名查询用户信息 -->
+    <select id="getUserByUsername" resultType="User">
+        SELECT *
+        FROM user
+        WHERE username = #{username} <!-- 根据指定的用户名查询用户信息 -->
+    </select>
+
+    <!-- 更新用户最后登录时间 -->
+    <update id="updateLoginTime">
+        UPDATE user
+        SET last_login = now() <!-- 更新最后登录时间为当前时间 -->
+        WHERE user_id = #{userId} <!-- 根据指定的用户ID更新 -->
+    </update>
+
+    <!-- 注册用户-->
+    <insert id="registerUser">
+        INSERT INTO user
+        (user_id, username, password, phone)
+        VALUES
+        (#{userId}, #{username}, #{password}, #{phone}) <!-- 插入用户信息 -->
+    </insert>
+
+    <!-- 插入用户 -->
+    <insert id="insertUser">
+        INSERT INTO user
+        (user_id, username, password, phone, balance, role, avatar)
+        VALUES
+        (#{userId}, #{username}, #{password}, #{phone}, #{balance}, #{role}, #{avatar}) <!-- 插入用户信息 -->
+    </insert>
+
+    <!-- 更新用户信息 -->
+    <update id="updateUser">
+        UPDATE user
+        <set>
+            <!-- 如果传入了用户名，则更新用户名字段 -->
+            <if test="username != null and username != ''">
+                username = #{username},
+            </if>
+            <!-- 如果传入了密码，则更新密码字段 -->
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <!-- 如果传入了电话号码，则更新电话号码字段 -->
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <!-- 如果传入了余额，则更新余额字段 -->
+            <if test="balance != null">
+                balance = #{balance},
+            </if>
+            <!-- 如果传入了角色，则更新角色字段 -->
+            <if test="role != null">
+                role = #{role},
+            </if>
+            <!-- 如果传入了头像，则更新头像字段 -->
+            <if test="avatar != null and avatar != ''">
+                avatar = #{avatar}
+            </if>
+        </set>
+        WHERE user_id = #{userId} <!-- 根据指定的用户ID进行更新 -->
+    </update>
+
+    <!-- 检查用户名是否唯一 -->
+    <select id="checkUsernameIsUnique" resultType="Int">
+        SELECT count(1)
+        FROM user
+        WHERE username = #{username} <!-- 根据指定的用户名查询记录数量 -->
+    </select>
+
+    <!-- 查询用户列表 -->
+    <select id="queryUserList" resultType="User">
+        SELECT *
+        FROM user
+        <where>
+            <!-- 如果传入了用户名，则根据用户名模糊查询 -->
+            <if test="username != null and username != ''">
+                username LIKE '%${username}%'
+            </if>
+            <!-- 如果传入了角色，则根据角色查询 -->
+            <if test="role != null">
+                AND role = #{role}
+            </if>
+        </where>
+        ORDER BY role DESC <!-- 按照角色降序排序 -->
+    </select>
+
+    <!-- 根据用户ID查询用户信息 -->
+    <select id="getUserById" resultType="User">
+        SELECT *
+        FROM user
+        WHERE user_id = #{userId} <!-- 根据指定的用户ID查询用户信息 -->
+    </select>
+
+</mapper>

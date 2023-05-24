@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jee.demo.mapper.ChargePalMapper">
+    <!-- 根据充电宝ID查询充电宝信息 -->
+    <select id="getChargePalById" resultType="ChargePal">
+        SELECT *
+        FROM charge_pal
+        WHERE p_id = #{pId} <!-- 根据指定的充电宝ID查询充电宝信息 -->
+    </select>
+
+    <!-- 查询充电宝列表 -->
+    <select id="queryChargePalList" resultType="ChargePal">
+        SELECT *
+        FROM charge_pal
+        <where>
+            <!-- 如果传入了充电宝状态，则根据状态查询 -->
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <!-- 如果传入了投放点名称，则根据名称模糊查询对应的充电宝 -->
+            <if test="dpName != null and dpName != ''">
+                AND dp_id IN (SELECT dp_id FROM drop_point WHERE dp_name LIKE CONCAT('%', #{dpName}, '%'))
+            </if>
+            <!-- 如果传入了充电宝品牌，则根据品牌模糊查询 -->
+            <if test="brand != null and brand != ''">
+                AND brand LIKE CONCAT('%', #{brand}, '%')
+            </if>
+        </where>
+        ORDER BY status DESC <!-- 按照状态降序排序 -->
+    </select>
+
+    <!-- 根据投放点ID查询对应状态为1的所有充电宝列表 -->
+    <select id="getAllChargePalListByChargePalByDpId" resultType="ChargePal">
+        SELECT *
+        FROM charge_pal
+        WHERE dp_id = #{dpId} AND status = 1 <!-- 查询指定投放点ID下状态为1的充电宝列表 -->
+    </select>
+
+    <!-- 插入充电宝 -->
+    <insert id="insertChargePal">
+        INSERT INTO charge_pal
+        (p_id, brand, price, total, img, status, dp_id)
+        VALUES
+        (#{pId}, #{brand}, #{price}, #{total}, #{img}, #{status}, #{dpId}) <!-- 插入充电宝信息 -->
+    </insert>
+
+    <!-- 删除充电宝 -->
+    <delete id="deleteChargePal">
+        DELETE FROM charge_pal
+        WHERE p_id = #{pId} <!-- 根据指定的充电宝ID进行删除 -->
+    </delete>
+
+    <!-- 更新充电宝信息 -->
+    <update id="updateChargePal">
+        UPDATE charge_pal
+        <set>
+            <!-- 如果传入了充电宝品牌，则更新品牌字段 -->
+            <if test="brand != null and brand != ''">
+                brand = #{brand},
+            </if>
+            <!-- 如果传入了充电宝价格，则更新价格字段 -->
+            <if test="price != null">
+                price = #{price},
+            </if>
+            <!-- 如果传入了充电宝总数，则更新总数字段 -->
+            <if test="total != null">
+                total = #{total},
+            </if>
+            <!-- 如果传入了充电宝状态，则更新状态字段 -->
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <!-- 如果传入了投放点ID，则更新投放点ID字段 -->
+            <if test="dpId != null">
+                dp_id = #{dpId},
+            </if>
+            <!-- 如果传入了充电宝图片地址，则更新图片字段 -->
+            <if test="img != null and img != ''">
+                img = #{img}
+            </if>
+        </set>
+        WHERE p_id = #{pId} <!-- 根据指定的充电宝ID进行更新 -->
+    </update>
+
+</mapper>

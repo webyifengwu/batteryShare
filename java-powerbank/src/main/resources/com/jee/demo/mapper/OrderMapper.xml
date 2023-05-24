@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jee.demo.mapper.OrderMapper">
+    <!-- 根据订单ID获取订单信息 -->
+    <select id="getOrderById" resultType="Order">
+        SELECT *
+        FROM t_order
+        WHERE order_id = #{orderId} <!-- 根据指定的订单ID进行查询 -->
+    </select>
+
+    <!-- 根据用户ID和状态获取订单列表 -->
+    <select id="getOrderByUserAndId" resultType="Order">
+        SELECT *
+        FROM t_order
+        WHERE status = #{status} <!-- 根据指定的状态进行查询 -->
+        AND user_id = #{userId} <!-- 根据指定的用户ID进行查询 -->
+        ORDER BY create_time DESC <!-- 按照创建时间降序排列 -->
+    </select>
+
+    <!-- 查询订单列表 -->
+    <select id="queryOrderList" resultType="Order">
+        SELECT *
+        FROM t_order
+        <where>
+            <!-- 如果传入了用户名，则根据用户名模糊查询用户ID -->
+            <if test="username != null and username != ''">
+                AND user_id IN (SELECT user_id FROM User WHERE username LIKE CONCAT('%', #{username}, '%'))
+            </if>
+            <!-- 如果传入了订单状态，则根据订单状态查询 -->
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY status DESC, create_time DESC <!-- 按照订单状态降序和创建时间降序排序 -->
+    </select>
+
+    <!-- 插入订单 -->
+    <insert id="insertOrder">
+        INSERT INTO t_order
+        (
+        order_id, time, total, status, p_id, user_id, dp_id, create_time
+        )
+        VALUES
+        (
+        #{orderId}, #{time}, #{total}, #{status}, #{pId}, #{userId}, #{dpId}, now() <!-- 插入当前时间 -->
+        )
+    </insert>
+
+    <!-- 根据订单ID删除订单 -->
+    <delete id="deleteOrder">
+        DELETE FROM t_order
+        WHERE order_id = #{orderId} <!-- 指定要删除的订单ID -->
+    </delete>
+
+    <!-- 更新订单 -->
+    <update id="updateOrder">
+        UPDATE t_order
+        <set>
+            <!-- 如果传入了时间，则更新时间字段 -->
+            <if test="time != null">time = #{time},</if>
+            <!-- 如果传入了总额，则更新总额字段 -->
+            <if test="total != null">total = #{total},</if>
+            <!-- 如果传入了状态，则更新状态字段 -->
+            <if test="status != null">status = #{status},</if>
+            <!-- 如果传入了产品ID，则更新产品ID字段 -->
+            <if test="pId != null and pId != ''">p_id = #{pId},</if>
+            <!-- 如果传入了用户ID，则更新用户ID字段 -->
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <!-- 如果传入了部门ID，则更新部门ID字段 -->
+            <if test="dpId != null and dpId != ''">dp_id = #{dpId},</if>
+            end_time = now() <!-- 更新结束时间字段为当前时间 -->
+        </set>
+        WHERE order_id = #{orderId} <!-- 根据指定的订单ID进行更新 -->
+    </update>
+</mapper>
